@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国际商务全套综合复习题</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', sans-serif; background-color: #f5f7fa; }
+        .question-card { transition: all 0.3s ease; }
+        .question-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); }
+        .option-item { transition: all 0.2s ease; cursor: pointer; }
+        .option-item:hover { background-color: #f0f7ff; }
+        .option-item.selected { background-color: #0070C0; color: white; }
+        .option-item.correct { background-color: #10B981; color: white; }
+        .option-item.wrong { background-color: #EF4444; color: white; }
+        .timer { font-variant-numeric: tabular-nums; }
+        .score-progress { transition: width 1s ease; }
+        .correct { color: #047857; font-weight: bold; }
+        .wrong { color: #dc2626; font-weight: bold; }
+        .review-item { padding: 12px; border-radius: 8px; margin-bottom: 8px; background: #f9fafb; }
+        .explanation { color: #374151; margin-top: 6px; font-size: 14px; }
+        .difficulty-star { color: #F59E0B; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <header class="bg-[#003366] text-white shadow-lg fixed w-full top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold">国际商务高难度复习题</h1>
+            <div class="flex items-center gap-4">
+                <div class="timer bg-red-600 px-3 py-1 rounded-full font-bold" id="timer">剩余时间：90:00</div>
+                <button id="api-settings-btn" class="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded">AI判分设置</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- 开始页面 -->
+        <div id="start-page" class="flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-[#003366] mb-4">国际商务高难度复习
+                    </h2>
+                    <p class="text-gray-600 mb-2">考查范围：国际商务概述、经营形式与理论、政治/法律/经济/文化环境、国际贸易与投资规则体系</p>
+                    <p class="text-gray-600 mb-2">考试时长：90分钟</p>
+                    <p class="text-gray-600 mb-4">总分：260分</p>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="font-bold text-lg mb-3">题型与分值分布</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex justify-between"><span>一、单项选择题（20题）</span><span class="font-bold">40分</span></li>
+                        <li class="flex justify-between"><span>二、多项选择题（10题）</span><span class="font-bold">30分</span></li>
+                        <li class="flex justify-between"><span>三、判断题（20题）</span><span class="font-bold">20分</span></li>
+                        <li class="flex justify-between"><span>四、名词解释（10题）</span><span class="font-bold">40分</span></li>
+                        <li class="flex justify-between"><span>五、简答题（8题）</span><span class="font-bold">64分</span></li>
+                        <li class="flex justify-between"><span>六、论述题（2题）</span><span class="font-bold">36分</span></li>
+                        <li class="flex justify-between"><span>七、案例分析题（1题）</span><span class="font-bold">30分</span></li>
+                    </ul>
+                </div>
+
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-bold text-sm mb-2">难度标注说明</h3>
+                    <p class="text-sm text-gray-600">★ 基础题 | ★★ 中档题 | ★★★ 拔高/难题 </p>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <button id="start-exam-btn" class="w-full bg-[#0070C0] hover:bg-[#005999] text-white font-bold py-3 rounded-lg transition">开始考试</button>
+                    <p class="text-center text-sm text-gray-500">温馨提示：考试开始后请认真作答，中途退出将自动提交试卷</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 考试页面 -->
+        <div id="exam-page" class="hidden">
+            <div class="flex flex-col gap-6">
+                <div class="bg-white rounded-lg shadow p-4 sticky top-20 z-40">
+                    <div class="flex flex-wrap gap-2">
+                        <button class="type-nav-btn px-3 py-1 rounded bg-[#0070C0] text-white" data-type="single">单选题</button>
+                        <button class="type-nav-btn px-3 py-1 rounded bg-gray-200" data-type="multiple">多选题</button>
+                        <button class="type-nav-btn px-3 py-1 rounded bg-gray-200" data-type="judge">判断题</button>
+                        <button class="type-nav-btn px-3 py-1 rounded bg-gray-200" data-type="concept">名词解释</button>
+                        <button class="type-nav-btn px-3 py-1 rounded bg-gray-200" data-type="short">简答题</button>
+                        <button class="type-nav-btn px-3 py-1 rounded bg-gray-200" data-type="essay">论述题</button>
+                        <button class="type-nav-btn px-3 py-1 rounded bg-gray-200" data-type="case">案例分析</button>
+                    </div>
+                </div>
+                <div id="questions-container" class="space-y-6"></div>
+                <div class="sticky bottom-4 z-40">
+                    <button id="submit-exam-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-lg transition">提交试卷</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成绩页面 -->
+        <div id="result-page" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-[#003366] mb-4">考试完成！</h2>
+                    <div class="relative w-48 h-48 mx-auto mb-4">
+                        <div class="absolute inset-0 rounded-full bg-gray-200"></div>
+                        <div id="score-progress" class="score-progress absolute inset-0 rounded-full bg-[#0070C0]" style="width: 0%"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="total-score" class="text-4xl font-bold">0</span><span class="text-2xl ml-1">/260</span>
+                        </div>
+                    </div>
+                    <p id="score-level" class="text-xl font-semibold mb-2"></p>
+                    <p class="text-gray-600">考试时长：<span id="used-time"></span></p>
+                </div>
+                <div class="mb-8">
+                    <h3 class="font-bold text-lg mb-4">各题型得分详情</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-lg bg-gray-50"><div class="flex justify-between mb-2"><span>单选题</span><span id="single-score">0/40</span></div><div class="w-full bg-gray-200 rounded h-2"><div id="single-progress" class="bg-[#0070C0] h-2 rounded" style="width:0%"></div></div></div>
+                        <div class="p-4 rounded-lg bg-gray-50"><div class="flex justify-between mb-2"><span>多选题</span><span id="multiple-score">0/30</span></div><div class="w-full bg-gray-200 rounded h-2"><div id="multiple-progress" class="bg-[#0070C0] h-2 rounded" style="width:0%"></div></div></div>
+                        <div class="p-4 rounded-lg bg-gray-50"><div class="flex justify-between mb-2"><span>判断题</span><span id="judge-score">0/20</span></div><div class="w-full bg-gray-200 rounded h-2"><div id="judge-progress" class="bg-[#0070C0] h-2 rounded" style="width:0%"></div></div></div>
+                        <div class="p-4 rounded-lg bg-gray-50"><div class="flex justify-between mb-2"><span>名词解释</span><span id="concept-score">0/40</span></div><div class="w-full bg-gray-200 rounded h-2"><div id="concept-progress" class="bg-[#0070C0] h-2 rounded" style="width:0%"></div></div></div>
+                        <div class="p-4 rounded-lg bg-gray-50"><div class="flex justify-between mb-2"><span>简答题</span><span id="short-score">0/64</span></div><div class="w-full bg-gray-200 rounded h-2"><div id="short-progress" class="bg-[#0070C0] h-2 rounded" style="width:0%"></div></div></div>
+                        <div class="p-4 rounded-lg bg-gray-50"><div class="flex justify-between mb-2"><span>论述题</span><span id="essay-score">0/36</span></div><div class="w-full bg-gray-200 rounded h-2"><div id="essay-progress" class="bg-[#0070C0] h-2 rounded" style="width:0%"></div></div></div>
+                        <div class="p-4 rounded-lg bg-gray-50"><div class="flex justify-between mb-2"><span>案例分析</span><span id="case-score">0/30</span></div><div class="w-full bg-gray-200 rounded h-2"><div id="case-progress" class="bg-[#0070C0] h-2 rounded" style="width:0%"></div></div></div>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <button id="review-btn" class="w-full bg-[#0070C0] hover:bg-[#005999] text-white font-bold py-3 rounded-lg transition">查看参考答案与解析</button>
+                    <button id="restart-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 rounded-lg transition">重新考试</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 解析页面 -->
+        <div id="review-page" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold text-[#003366] mb-4">📝 参考答案与解析</h2>
+                <div id="review-container" class="space-y-6"></div>
+                <button id="back-result-btn" class="mt-6 w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 rounded-lg transition">返回成绩页</button>
+            </div>
+        </div>
+
+        <!-- AI判分设置 -->
+        <div id="api-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+                <h3 class="text-xl font-bold mb-4">AI API设置</h3>
+                <p class="text-gray-600 mb-4">用于名词解释、简答题和论述题的自动判分，不填则主观题默认0分</p>
+                <div class="space-y-4">
+                    <div><label class="block font-medium mb-1">AI服务商</label><select id="api-provider" class="w-full p-2 border rounded"><option value="deepseek">DeepSeek</option><option value="tongyi">通义千问</option><option value="moonshot">月之暗面</option><option value="glm">智谱GLM</option><option value="openai">OpenAI</option></select></div>
+                    <div><label class="block font-medium mb-1">API Key</label><input type="password" id="api-key" class="w-full p-2 border rounded" placeholder="请输入API Key"></div>
+                    <div><label class="block font-medium mb-1">模型名称（可选）</label><input type="text" id="api-model" class="w-full p-2 border rounded" placeholder="默认可不填"></div>
+                </div>
+                <div class="mt-6 flex gap-3">
+                    <button id="save-api-btn" class="flex-1 bg-[#0070C0] hover:bg-[#005999] text-white font-bold py-2 rounded">保存设置</button>
+                    <button id="close-api-btn" class="flex-1 bg-gray-200 hover:bg-gray-300 font-bold py-2 rounded">取消</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ====================== 完整题库（国际商务全套综合复习题） ======================
+        const fullQuestionBank = {
+            "single": [
+                { id: 1, question: "国际商务最主要的参与主体是（）", answer: "B", explain: "跨国公司是国际商务活动的主体力量，虽然国家政府或国际机构有时也参与，但企业是主要参与者。", score: 2, difficulty: 1, options: ["A. 各国政府", "B. 跨国公司", "C. 国际组织", "D. 金融机构"] },
+                { id: 2, question: "企业国际化经营最初级的形式是（）", answer: "A", explain: "间接出口是国际化经营的初级形态，企业通过中间商出口，不直接接触海外市场。", score: 2, difficulty: 1, options: ["A. 间接出口", "B. 直接出口", "C. 技术授权", "D. 对外直接投资"] },
+                { id: 3, question: "关税按照商品流向划分，不包括以下哪一项（）", answer: "D", explain: "关税按流向分为进口关税、出口关税、过境关税。普惠关税是按税率划分的优惠关税类型。", score: 2, difficulty: 1, options: ["A. 进口关税", "B. 出口关税", "C. 过境关税", "D. 普惠关税"] },
+                { id: 4, question: "GATT正式签署的时间与参与初始国家数量是（）", answer: "A", explain: "GATT于1947年10月30日在日内瓦签署，初始签约国为23个。", score: 2, difficulty: 1, options: ["A. 1947年，23国", "B. 1948年，23国", "C. 1995年，120国", "D. 2001年，143国"] },
+                { id: 5, question: "世界贸易组织（WTO）正式成立于（）", answer: "C", explain: "世界贸易组织（WTO）于1995年1月1日正式成立，取代GATT成为全球贸易治理的核心机构。", score: 2, difficulty: 1, options: ["A. 1947年", "B. 1986年", "C. 1995年", "D. 2001年"] },
+                { id: 6, question: "国际生产折衷理论的三大优势不包括（）", answer: "D", explain: "国际生产折衷理论（OIL理论）的三大优势是：所有权优势、内部化优势、区位优势。", score: 2, difficulty: 1, options: ["A. 所有权优势", "B. 内部化优势", "C. 区位优势", "D. 规模优势"] },
+                { id: 7, question: "以下不属于东道国外资激励政策的是（）", answer: "C", explain: "股权比例限制属于限制性政策，不是激励政策。激励政策包括税收减免、土地优惠、低息贷款等。", score: 2, difficulty: 1, options: ["A. 所得税减免", "B. 土地优惠", "C. 股权比例限制", "D. 低息贷款"] },
+                { id: 8, question: "大陆法系又被称为（）", answer: "B", explain: "大陆法系以成文法典为核心，又称成文法系；英美法系以判例为核心，又称普通法系。", score: 2, difficulty: 1, options: ["A. 普通法系", "B. 成文法系", "C. 神权法系", "D. 海洋法系"] },
+                { id: 9, question: "市场经济的核心运行逻辑是（）", answer: "B", explain: "市场经济的核心原则是自由放任，强调市场在资源配置中的决定性作用，即'看不见的手'。", score: 2, difficulty: 1, options: ["A. 国家计划调控", "B. 自由放任、看不见的手", "C. 公私混合管控", "D. 行政指令分配"] },
+                { id: 10, question: "霍夫斯泰德文化维度中，中国最突出的特征是（）", answer: "B", explain: "中国文化特征表现为高权力距离（尊重权威等级）和长期导向（注重未来规划）。", score: 2, difficulty: 1, options: ["A. 短期导向", "B. 高权力距离、长期导向", "C. 高个人主义", "D. 弱不确定性规避"] },
+                { id: 11, question: "进口配额分为绝对配额和（）", answer: "B", explain: "进口配额分为绝对配额（超过即禁止进口）和关税配额（超过后征收高关税）两类。", score: 2, difficulty: 2, options: ["A. 自愿出口限制", "B. 关税配额", "C. 国产化规定", "D. 进出口许可证"] },
+                { id: 12, question: "WTO争端解决机制采用的核心原则是（）", answer: "B", explain: "反向协商一致原则：只有全体成员一致否决，议案才能被驳回；只要有一方同意，议案即可通过。", score: 2, difficulty: 2, options: ["A. 协商一致", "B. 反向协商一致", "C. 一票否决", "D. 少数服从多数"] },
+                { id: 13, question: "区域经济一体化程度最低的形式是（）", answer: "A", explain: "自由贸易区（FTA）是区域经济一体化最低层次，区内取消关税壁垒，对外各自保留关税。", score: 2, difficulty: 2, options: ["A. 自由贸易区", "B. 关税同盟", "C. 共同市场", "D. 经济联盟"] },
+                { id: 14, question: "首个双边投资协定（BIT）签订于1959年，签约双方是（）", answer: "B", explain: "1959年德国与巴基斯坦签订了世界上第一个双边投资协定（BIT）。", score: 2, difficulty: 2, options: ["A. 美国、加拿大", "B. 德国、巴基斯坦", "C. 中国、东盟", "D. 日本、韩国"] },
+                { id: 15, question: "《多边投资协定》（MAI）谈判发起与失败的平台是（）", answer: "C", explain: "MAI于1995年在OECD发起谈判，1998年失败，原因是成员分歧大、缺乏公开性、未纳入环保劳工条款。", score: 2, difficulty: 2, options: ["A. WTO", "B. 联合国", "C. OECD", "D. G20"] },
+                { id: 16, question: "反倾销税的征收针对的是（）", answer: "B", explain: "反倾销税针对企业低价倾销行为，当进口产品以低于正常价值销售并对国内产业造成损害时征收。", score: 2, difficulty: 2, options: ["A. 外国政府补贴行为", "B. 企业低价倾销行为", "C. 进口配额超标", "D. 外汇违规行为"] },
+                { id: 17, question: "以下属于边境后措施的是（）", answer: "C", explain: "边境后措施指各国境内的制度规则，如劳工标准、竞争中立等，区别于关税、配额等边境措施。", score: 2, difficulty: 2, options: ["A. 进口关税", "B. 进口配额", "C. 劳工标准、竞争中立", "D. 过境税"] },
+                { id: 18, question: "国际商务争端解决最主流、应用最广泛的方式是（）", answer: "B", explain: "仲裁是国际贸易中解决争议最常见的方式，具有专业性、保密性、终局性等优点。", score: 2, difficulty: 2, options: ["A. 国际法院诉讼", "B. 仲裁", "C. 政府外交谈判", "D. 强制执行"] },
+                { id: 19, question: "政治风险中，东道国无偿将外资企业资产收归国有的行为是（）", answer: "B", explain: "没收是无偿收归国有，不给补偿；征用是有偿收归国有，给予补偿。", score: 2, difficulty: 2, options: ["A. 征用", "B. 没收", "C. 国产化", "D. 外汇管制"] },
+                { id: 20, question: "企业仅具备所有权优势和内部化优势，无东道国区位优势时，最优经营方式是（）", answer: "B", explain: "根据OIL理论，有所有权+内部化优势但无区位优势时，应选择出口贸易。", score: 2, difficulty: 2, options: ["A. 对外直接投资", "B. 出口贸易", "C. 技术授权", "D. 跨国并购"] }
+            ],
+            "multiple": [
+                { id: 1, question: "国际贸易政策工具分为关税和非关税措施，下列属于非关税壁垒的有（）", answer: ["A","B","C","D"], explain: "进口配额、自愿出口限制、国产化规定、外汇管制均属于非关税壁垒。", score: 3, difficulty: 1, options: ["A. 进口配额", "B. 自愿出口限制", "C. 国产化规定", "D. 外汇管制"] },
+                { id: 2, question: "GATT的两大核心非歧视原则是（）", answer: ["A","B"], explain: "GATT的非歧视原则包含最惠国待遇和国民待遇两个核心部分。", score: 3, difficulty: 1, options: ["A. 最惠国待遇", "B. 国民待遇", "C. 公平公正待遇", "D. 透明度原则"] },
+                { id: 3, question: "国际商务的主要形式包括（）", answer: ["A","B","C","D"], explain: "国际商务包括国际贸易、国际投资、国际合作、跨境技术转让等多种形式。", score: 3, difficulty: 1, options: ["A. 国际贸易", "B. 国际投资", "C. 国际合作", "D. 跨境技术转让"] },
+                { id: 4, question: "东道国限制外商投资的手段主要分为（）", answer: ["A","B"], explain: "限制手段分为准入限制（投资范围、股权比例）和运作限制（国产化、外汇管制等）。", score: 3, difficulty: 1, options: ["A. 准入限制", "B. 运作限制", "C. 税收优惠", "D. 土地补贴"] },
+                { id: 5, question: "世界三大法律体系包括（）", answer: ["A","B","C"], explain: "世界三大法律体系是英美法系、大陆法系和神权法系。", score: 3, difficulty: 1, options: ["A. 英美法系", "B. 大陆法系", "C. 神权法系", "D. 社会主义法系"] },
+                { id: 6, question: "政府设置贸易与投资壁垒的原因包括（）", answer: ["A","B","C","D"], explain: "设置壁垒的原因包括保护就业、保护幼稚产业、国家安全、文化地缘政治考量等。", score: 3, difficulty: 3, options: ["A. 保护就业", "B. 保护幼稚产业", "C. 国家安全", "D. 文化与地缘政治考量"] },
+                { id: 7, question: "WTO涵盖的六大领域包括（）", answer: ["A","B","C","D"], explain: "WTO涵盖货物贸易、服务贸易、知识产权、争端解决、贸易政策审议、投资措施等领域。", score: 3, difficulty: 3, options: ["A. 货物贸易协定", "B. 服务贸易总协定（GATS）", "C. 知识产权协议（TRIPS）", "D. 争端解决机制、贸易政策审议"] },
+                { id: 8, question: "二战后国际投资多边化尝试多次失败，典型事件有（）", answer: ["A","B"], explain: "《哈瓦那宪章》和MAI多边投资协定是二战后投资多边化失败的典型事件。", score: 3, difficulty: 3, options: ["A. 《哈瓦那宪章》", "B. MAI多边投资协定", "C. G20全球投资指导原则", "D. TRIMs协议"] },
+                { id: 9, question: "新一代国际贸易投资规则（第二代WTO-X）的新议题包括（）", answer: ["A","B","C","D"], explain: "第二代规则涵盖竞争中立、劳工环保标准、电子商务、国有企业规则等边境后新议题。", score: 3, difficulty: 3, options: ["A. 竞争中立", "B. 劳工与环保标准", "C. 电子商务", "D. 国有企业规则"] },
+                { id: 10, question: "跨国企业规避海外政治风险的策略有（）", answer: ["A","B","C","D"], explain: "规避政治风险的策略包括本土化经营、分散投资国别、购买海外投资保险、强化企业社会责任等。", score: 3, difficulty: 3, options: ["A. 本土化经营", "B. 分散投资国别", "C. 购买海外投资保险", "D. 强化企业社会责任"] }
+            ],
+            "judge": [
+                { id: 1, question: "优惠关税包含最惠国待遇、普遍优惠关税、特定优惠关税三类。", answer: true, explain: "优惠关税分为最惠国待遇关税、普遍优惠关税（普惠制）、特定优惠关税三类。", score: 1, difficulty: 1 },
+                { id: 2, question: "自愿出口限制本质上是出口国完全自愿实施的贸易限制措施。", answer: false, explain: "VER名义自愿，实质是在进口国压力下被迫实施，是贸易保护手段。", score: 1, difficulty: 1 },
+                { id: 3, question: "WTO是正式国际组织，而GATT只是多边贸易协定，并非组织。", answer: true, explain: "WTO是正式国际组织，具有法律人格；GATT只是多边协定，不是国际组织。", score: 1, difficulty: 1 },
+                { id: 4, question: "多哈回合谈判自2001年启动，目前已全面落地达成全部共识。", answer: false, explain: "多哈回合谈判陷入僵局，未能达成共识，是WTO多边谈判停滞的典型表现。", score: 1, difficulty: 1 },
+                { id: 5, question: "《G20全球投资指导原则》具备强制法律约束力，是全球首个多边投资条约。", answer: false, explain: "G20投资指导原则仅为非约束性纲领文件，无强制法律效力。", score: 1, difficulty: 1 },
+                { id: 6, question: "双边投资协定（BIT）是当前多边投资规则缺位下的主要补充形式。", answer: true, explain: "由于多边投资规则缺位，BIT成为国际投资规则的主要载体。", score: 1, difficulty: 1 },
+                { id: 7, question: "国际生产折衷理论中，仅拥有所有权优势即可开展对外直接投资。", answer: false, explain: "FDI需要同时具备所有权优势、内部化优势、区位优势三大条件。", score: 1, difficulty: 2 },
+                { id: 8, question: "间接出口可以帮助企业直接积累海外市场经营经验。", answer: false, explain: "间接出口通过中间商进行，企业无法直接接触海外市场，难以积累国际化经验。", score: 1, difficulty: 2 },
+                { id: 9, question: "负面清单模式下，未列入清单的行业自动享有准入前国民待遇。", answer: true, explain: "负面清单模式下，清单之外的领域外资自动享受准入前国民待遇。", score: 1, difficulty: 2 },
+                { id: 10, question: "征用与没收的核心区别在于：征用会给予补偿，没收无偿收归国有。", answer: true, explain: "征用是有偿收归国有，给予补偿；没收是无偿收归国有，不给补偿。", score: 1, difficulty: 2 },
+                { id: 11, question: "英美法系以成文法典为核心，大陆法系以判例、先例为核心。", answer: false, explain: "英美法系以判例为核心，大陆法系以成文法典为核心，题目说反了。", score: 1, difficulty: 2 },
+                { id: 12, question: "知识产权保护两大国际公约为《巴黎公约》和《伯尔尼公约》。", answer: true, explain: "《巴黎公约》保护工业产权，《伯尔尼公约》保护文学艺术作品著作权。", score: 1, difficulty: 1 },
+                { id: 13, question: "绝大多数国家当前都属于混合经济体制。", answer: true, explain: "当前绝大多数国家实行混合经济体制，市场与政府调控相结合。", score: 1, difficulty: 1 },
+                { id: 14, question: "文化移植模式比文化嫁接模式更适合跨国企业跨文化管理。", answer: false, explain: "文化嫁接模式更适合跨国企业，保留本土文化同时融入当地元素。", score: 1, difficulty: 2 },
+                { id: 15, question: "宏观政治风险仅针对特定行业或个别外资企业。", answer: false, explain: "宏观政治风险影响所有外资企业，微观政治风险才针对特定行业或企业。", score: 1, difficulty: 2 },
+                { id: 16, question: "补贴分为出口补贴和生产补贴，二者均可能引发反补贴调查。", answer: true, explain: "出口补贴和生产补贴都可能被认定为可诉补贴，引发反补贴调查。", score: 1, difficulty: 1 },
+                { id: 17, question: "区域经济一体化中，经济联盟的一体化程度高于共同市场。", answer: true, explain: "经济联盟统一经济政策、货币财政规则，一体化程度高于共同市场。", score: 1, difficulty: 1 },
+                { id: 18, question: "全球贸易规则演变呈现\"多边快、区域慢\"的特征。", answer: false, explain: "实际情况是\"多边慢、区域快\"，多边谈判停滞，区域协定快速发展。", score: 1, difficulty: 2 },
+                { id: 19, question: "反倾销、反补贴属于贸易救济措施，目的是维护公平贸易。", answer: true, explain: "反倾销、反补贴是贸易救济措施，旨在维护公平贸易秩序。", score: 1, difficulty: 1 },
+                { id: 20, question: "霍夫斯泰德理论中，集体主义文化更重视团队和谐与群体利益。", answer: true, explain: "集体主义文化强调团队和谐、群体利益高于个人利益。", score: 1, difficulty: 1 }
+            ],
+            "concept": [
+                { id: 1, question: "关税", answer: "是进出口商品经过一国关境时，由海关向进出口商征收的税收，是最古老、最基础的贸易政策工具。按流向可分为进口税、出口税、过境税。", score: 4, difficulty: 1 },
+                { id: 2, question: "进口配额", answer: "非关税壁垒的一种，指一国在一定时期内，对特定商品的进口数量或金额设定限额，分为绝对配额和关税配额两类，直接限制商品进口。", score: 4, difficulty: 2 },
+                { id: 3, question: "自愿出口限制（VER）", answer: "出口国在进口国压力下，主动对出口商品进行数量限制的贸易措施，名义自愿，实质是替代关税、配额的贸易保护手段。", score: 4, difficulty: 2 },
+                { id: 4, question: "反向协商一致原则", answer: "WTO争端解决机制的核心规则。只有全体成员一致否决，议案才能被驳回；只要有一方同意，议案即可通过，解决了GATT争端机制执行力弱的问题。", score: 4, difficulty: 3 },
+                { id: 5, question: "国际生产折衷理论（OIL理论）", answer: "邓宁提出的FDI经典理论，认为企业开展对外直接投资必须同时具备所有权优势、内部化优势、区位优势三大条件，三大优势的组合决定企业国际化经营方式。", score: 4, difficulty: 3 },
+                { id: 6, question: "双边投资协定（BIT）", answer: "两国之间签订的，用于促进、保护跨境投资，约定双方投资权利与义务的双边协议。是当前国际投资规则的主要载体。", score: 4, difficulty: 2 },
+                { id: 7, question: "边境后措施", answer: "区别于关税、配额等\"边境措施\"，指各国境内的制度、规则与监管要求，如劳工标准、环保、竞争中立、国企规则等，是新一代贸易投资规则的核心。", score: 4, difficulty: 3 },
+                { id: 8, question: "负面清单", answer: "外资准入管理模式，将对外资不符国民待遇的限制措施以清单列明；清单之外的领域，外资自动享受准入前国民待遇。", score: 4, difficulty: 2 },
+                { id: 9, question: "政治风险", answer: "东道国政治事件、政策变动、国际关系变化等，给境外企业经营、资产带来损失的可能性，具有不可预测、破坏性强的特点。", score: 4, difficulty: 2 },
+                { id: 10, question: "文化冲突", answer: "不同国家、民族、企业文化之间相互排斥、对立的现象，会影响跨国企业内部管理与外部经营，处理不当易导致经营失败。", score: 4, difficulty: 2 }
+            ],
+            "short": [
+                { id: 1, question: "简述政府设置贸易与投资壁垒的六大原因。", answer: "①保护本国劳动就业；②保护国内幼稚产业；③扶持战略性产业发展；④维护国家安全；⑤保护本国文化与民族特征；⑥考量地缘政治与国际关系。", score: 8, difficulty: 1 },
+                { id: 2, question: "简述GATT的局限性，以及WTO相对GATT做出的改进。", answer: "（1）GATT局限：①只是多边协定，非正式国际组织，缺乏法律约束力与监督机制；②仅覆盖货物贸易，不含服务贸易、知识产权；③无法有效约束非关税壁垒，争端解决机制低效；④默许纺织品配额、农产品补贴等保护措施。\n（2）WTO改进：①正式国际组织，规则约束力更强；②覆盖货物、服务、知识产权、投资等多领域；③建立高效的争端解决机制（反向协商一致）；④增设贸易政策审议机制。", score: 8, difficulty: 1 },
+                { id: 3, question: "简述东道国外资激励政策与限制性政策的主要形式。", answer: "（1）激励政策：所得税/关税减免、低息贷款、财政补贴、固定资产折旧优惠、土地使用优惠、利润再投资优惠等。\n（2）限制性政策：分为准入限制（投资范围、股权比例、审批制度）和运作限制（国产化要求、外汇管制、技术转移、雇佣本地员工要求等）。", score: 8, difficulty: 1 },
+                { id: 4, question: "结合国际生产折衷理论，说明对外直接投资、出口、技术授权三种方式对应的优势组合。", answer: "①对外直接投资：同时具备所有权优势+内部化优势+区位优势；\n②商品出口：具备所有权优势+内部化优势，无明显东道国区位优势；\n③技术授权：仅具备所有权优势，缺乏内部化优势和区位优势。", score: 8, difficulty: 2 },
+                { id: 5, question: "简述二战后国际投资多边规则多次尝试失败的三次典型事件及核心原因。", answer: "（1）《哈瓦那宪章》（1948）：各国对投资保护、征收补偿分歧大，美欧等资本输出国与发展中资本输入国利益冲突，叠加美国国会反对，最终失败。\n（2）OECD《多边投资协定（MAI）》（1995-1998）：成员对投资范围无法达成共识；未纳入环保、劳工条款引发民间抗议；南北国家矛盾未解决，谈判缺乏公开性。\n（3）G20《全球投资指导原则》（2016）：仅为非约束性纲领文件，无强制法律效力，后续各国执行动力不足。", score: 8, difficulty: 2 },
+                { id: 6, question: "简述区域经济一体化由低到高的五个层次。", answer: "依次为：①自由贸易区（FTA）：区内取消关税壁垒，对外各自保留关税；②关税同盟：统一对外关税；③共同市场：实现商品、服务、生产要素自由流动；④经济联盟：统一经济政策、货币、财政规则；⑤政治联盟：经济+政治全面一体化，一体化程度最高。", score: 8, difficulty: 2 },
+                { id: 7, question: "对比第一代（WTO+）与第二代（WTO-X）贸易政策的核心差异，并分析演变背景。", answer: "（1）核心差异：第一代以市场准入为核心，聚焦关税、配额、反倾销、海关等传统边境措施；第二代以规制融合为核心，涵盖劳工、环保、竞争中立、知识产权、电子商务等边境后新议题。\n（2）演变背景：全球分工转向全球价值链贸易，关税壁垒作用弱化；服务贸易、跨境投资占比提升；传统多边谈判停滞，区域协定成为规则构建主要平台。", score: 8, difficulty: 3 },
+                { id: 8, question: "简述企业间接出口的优缺点。", answer: "（1）优点：借助中间商渠道快速进入海外市场；企业不承担汇率、市场需求等风险；无需增设出口相关岗位与机构；进退国际市场灵活。\n（2）缺点：无法直接掌握海外市场信息；难以积累国际化经营经验；对海外渠道控制力弱；不利于打造企业品牌、培养国际化人才。", score: 8, difficulty: 3 }
+            ],
+            "essay": [
+                { id: 1, question: "论述：国际贸易规则与国际投资规则的演进分化、成因及未来趋势\n\n二战以来，国际贸易规则与国际投资规则发展呈现明显分化，贸易规则多边化成熟，投资规则多边化屡屡受挫。请结合所学知识，论述二者演进路径、分化原因，并分析当前全球贸易投资规则的整体发展趋势。", answer: "【答题框架】\n\n一、演进路径分化\n\n（1）国际贸易规则演进：\n- 1947年GATT签署，主攻关税减让\n- 1995年WTO成立，拓展至服务、知识产权、争端解决\n- 2001年多哈回合陷入停滞\n- 规则制定逐步从多边转向区域/双边（RCEP、TPP、USMCA等）\n\n（2）国际投资规则演进：\n- 1948年《哈瓦那宪章》多边尝试失败\n- GATT/WTO阶段仅TRIMs协议有限规范投资\n- OECD的MAI协定谈判失败\n- 2016年G20投资指导原则仅为非约束性文件\n- 全球BIT数量激增，区域协定普遍增设投资章节\n\n二、分化核心原因\n\n（1）贸易规则成功原因：\n- 以关税、配额等边境措施为主，规则简单、各国共识易达成\n- 仅涉及商品流通，不触碰国家主权核心\n\n（2）投资规则失败原因：\n- 涉及东道国主权、监管权、公共利益、征收补偿等核心议题\n- 资本输出国（发达国家）与资本输入国（发展中国家）利益对立严重\n- 投资议题复杂度远高于贸易\n\n三、未来发展趋势\n\n① 规则载体：多边谈判持续低迷，区域、双边协定仍是主流\n② 规则内容：边境后措施成为博弈焦点，劳工、环保、竞争中立等新议题常态化\n③ 规则融合：贸易与投资规则深度捆绑，一体化特征明显\n④ 主体变化：发展中国家话语权提升，规则从单纯保护跨国公司转向平衡东道国与投资者权益", score: 18, difficulty: 3 },
+                { id: 2, question: "论述：结合全球价值链贸易，分析传统贸易壁垒失效的原因，以及新一代贸易投资规则的内容、特征与挑战\n\n当前全球贸易进入价值链贸易时代，传统关税壁垒作用不断弱化，全球贸易投资规则进入重构阶段。请谈谈你的理解。", answer: "【答题框架】\n\n一、背景\n\n全球分工从\"最终产品贸易\"转向全球价值链（GVC）分工，一件产品的研发、生产、组装、销售分散在多个国家，中间品贸易成为主流。\n\n二、传统关税/非关税壁垒失效的原因\n\n① 价值链下商品多次跨境，高额关税会层层叠加，损害所有参与国利益，各国主动削减关税\n② 企业布局全球供应链，进口配额、许可证等壁垒会直接打断产业链\n③ 贸易竞争焦点从\"商品关税\"转向国内制度、监管、服务、投资等深层次领域\n\n三、新一代贸易投资规则的核心内容\n\n① 传统议题升级：进一步放宽货物、服务、投资的市场准入，提高自由化标准\n② 新增边境后议题：竞争中立、国有企业、知识产权、电子商务、劳工标准、环保规则等\n\n四、新规则五大特征\n\n① 区域/双边规则逐步替代全球多边规则\n② 自由化、便利化标准更高\n③ 边境后措施成为核心\n④ 贸易与投资规则深度交融\n⑤ 初期由发达国家主导，新兴经济体逐步参与博弈\n\n五、现存挑战\n\n① 发达国家与发展中国家规则标准分歧巨大，高标准规则加大发展中国家合规压力\n② 逆全球化、贸易保护主义抬头，规则落地受阻\n③ WTO等多边机构改革滞后，难以适配新贸易形态\n④ 各国国情差异大，全球统一规则难以形成", score: 18, difficulty: 3 }
+            ],
+            "case": [
+                { id: 1, question: "【案例分析题】\n\n案例材料：\n近年来，部分发达国家频繁对我国出口产品发起反倾销、反补贴调查，同时出台严苛的技术标准、当地成分要求（国产化规定）限制进口；在投资领域，部分国家出台外资准入限制、外汇管制，甚至以国家安全为由禁止外资进入核心产业。与此同时，我国积极推动RCEP生效落地，持续缩减外资准入负面清单，鼓励双边投资协定谈判，参与全球投资规则制定。\n\n问题：\n\n1. 请识别材料中出现的关税/非关税壁垒、贸易救济措施、投资限制措施，并分类说明。（10分）\n\n2. 分析上述国家设置各类壁垒与限制措施的主要动机。（10分）\n\n3. 结合国际商务知识，从国家层面和出口/跨国企业层面，分别提出应对策略。（10分）", answer: "【参考答案】\n\n一、措施分类（10分）\n\n（1）贸易壁垒：非关税壁垒（进口技术标准、国产化规定）\n（2）贸易救济措施：反倾销税、反补贴税\n（3）投资限制措施：投资准入范围限制、外汇管制、国家安全审查\n\n二、设置壁垒的动机（10分）\n\n① 保护本国就业岗位\n② 保护本土幼稚产业与战略性产业\n③ 维护国家安全\n④ 出于地缘政治与国际竞争考量\n⑤ 保护本土文化与产业生态\n\n三、应对策略（10分）\n\n（1）国家层面：\n① 积极参与WTO、RCEP等多边/区域机制，利用争端解决机制维护合法权益\n② 持续优化外资营商环境，缩减负面清单，推动双边投资协定谈判\n③ 加强国际经贸合作，推动全球规则公平化，平衡各国利益诉求\n④ 完善国内产业政策，提升本土产业竞争力\n\n（2）企业层面：\n① 多元化布局海外市场，避免单一市场依赖\n② 开展本土化经营（生产、用工、采购本土化），规避国产化、外汇管制等限制\n③ 提升产品技术与质量，主动适配海外技术标准，减少反倾销风险\n④ 采用直接投资、海外建厂等方式替代单纯出口，绕过贸易壁垒\n⑤ 建立风险预警机制，提前研判东道国政治、政策风险", score: 30, difficulty: 3 }
+            ]
+        };
+
+        // ====================== 全局变量 ======================
+        let currentType = 'single';
+        let userAnswers = {};
+        let timerInterval = null;
+        let timeLeft = 90 * 60;
+        let startTime = null;
+        let apiConfig = { provider: 'deepseek', key: '', model: '' };
+        let shuffledQuestionBank = {};
+
+        // ====================== 初始化 ======================
+        document.addEventListener('DOMContentLoaded', () => {
+            initEventListeners();
+        });
+
+        function initEventListeners() {
+            document.getElementById('start-exam-btn').addEventListener('click', startExam);
+            document.getElementById('submit-exam-btn').addEventListener('click', submitExam);
+            document.getElementById('review-btn').addEventListener('click', showReview);
+            document.getElementById('restart-btn').addEventListener('click', restartExam);
+            document.getElementById('back-result-btn').addEventListener('click', backToResult);
+            document.getElementById('api-settings-btn').addEventListener('click', () => document.getElementById('api-modal').classList.remove('hidden'));
+            document.getElementById('close-api-btn').addEventListener('click', () => document.getElementById('api-modal').classList.add('hidden'));
+            document.getElementById('save-api-btn').addEventListener('click', saveApiConfig);
+
+            document.querySelectorAll('.type-nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentType = btn.dataset.type;
+                    renderQuestions();
+                    updateNavButtons();
+                });
+            });
+        }
+
+        function startExam() {
+            document.getElementById('start-page').classList.add('hidden');
+            document.getElementById('exam-page').classList.remove('hidden');
+            startTime = new Date();
+            startTimer();
+            
+            // 考试开始时一次性打乱所有题型的题目顺序
+            Object.keys(fullQuestionBank).forEach(type => {
+                shuffledQuestionBank[type] = shuffleArray(fullQuestionBank[type]);
+            });
+            
+            renderQuestions();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = `剩余时间：${minutes}:${seconds.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function updateNavButtons() {
+            document.querySelectorAll('.type-nav-btn').forEach(btn => {
+                btn.classList.remove('bg-[#0070C0]', 'text-white');
+                btn.classList.add('bg-gray-200');
+                if (btn.dataset.type === currentType) {
+                    btn.classList.add('bg-[#0070C0]', 'text-white');
+                    btn.classList.remove('bg-gray-200');
+                }
+            });
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            const questions = shuffledQuestionBank[currentType] || fullQuestionBank[currentType];
+            container.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'question-card bg-white rounded-lg shadow p-6';
+                card.id = `question-${currentType}-${q.id}`;
+
+                const difficultyStars = '★'.repeat(q.difficulty);
+                const typeNames = { single: '单选题', multiple: '多选题', judge: '判断题', concept: '名词解释', short: '简答题', essay: '论述题', case: '案例分析' };
+
+                let html = `
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">${typeNames[currentType]} ${index + 1}</span>
+                        <span class="difficulty-star text-sm">${difficultyStars}</span>
+                    </div>
+                    <p class="text-gray-800 font-medium mb-4">${q.question}</p>
+                `;
+
+                if (currentType === 'single' || currentType === 'multiple') {
+                    html += '<div class="space-y-2">';
+                    q.options.forEach((opt, i) => {
+                        const letter = String.fromCharCode(65 + i);
+                        const selected = currentType === 'multiple'
+                            ? (userAnswers[`${currentType}-${q.id}`] || []).includes(letter)
+                            : userAnswers[`${currentType}-${q.id}`] === letter;
+                        html += `
+                            <div class="option-item p-3 border rounded-lg ${selected ? 'selected' : ''}" data-id="${q.id}" data-letter="${letter}">
+                                ${opt}
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                } else if (currentType === 'judge') {
+                    html += `
+                        <div class="flex gap-4">
+                            <div class="option-item p-3 border rounded-lg flex-1 text-center ${userAnswers[`${currentType}-${q.id}`] === true ? 'selected' : ''}" data-id="${q.id}" data-value="true">正确 (√)</div>
+                            <div class="option-item p-3 border rounded-lg flex-1 text-center ${userAnswers[`${currentType}-${q.id}`] === false ? 'selected' : ''}" data-id="${q.id}" data-value="false">错误 (×)</div>
+                        </div>
+                    `;
+                } else {
+                    const textareaHeight = currentType === 'case' ? 'min-h-[300px]' : 'min-h-[120px]';
+                    html += `
+                        <textarea class="w-full p-3 border rounded-lg ${textareaHeight}" placeholder="请输入答案..." data-id="${q.id}">${userAnswers[`${currentType}-${q.id}`] || ''}</textarea>
+                    `;
+                }
+
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+
+            // 绑定事件
+            container.querySelectorAll('.option-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = item.dataset.id;
+                    if (currentType === 'multiple') {
+                        const letter = item.dataset.letter;
+                        if (!userAnswers[`${currentType}-${id}`]) userAnswers[`${currentType}-${id}`] = [];
+                        const idx = userAnswers[`${currentType}-${id}`].indexOf(letter);
+                        if (idx > -1) {
+                            userAnswers[`${currentType}-${id}`].splice(idx, 1);
+                        } else {
+                            userAnswers[`${currentType}-${id}`].push(letter);
+                        }
+                    } else if (currentType === 'judge') {
+                        userAnswers[`${currentType}-${id}`] = item.dataset.value === 'true';
+                    } else {
+                        userAnswers[`${currentType}-${id}`] = item.dataset.letter;
+                    }
+                    renderQuestions();
+                });
+            });
+
+            container.querySelectorAll('textarea').forEach(ta => {
+                ta.addEventListener('input', (e) => {
+                    userAnswers[`${currentType}-${e.target.dataset.id}`] = e.target.value;
+                });
+            });
+        }
+
+        async function submitExam() {
+            clearInterval(timerInterval);
+            const usedTime = Math.floor((new Date() - startTime) / 1000);
+            const minutes = Math.floor(usedTime / 60);
+            const seconds = usedTime % 60;
+            document.getElementById('used-time').textContent = `${minutes}分${seconds}秒`;
+
+            // 计算分数
+            const scores = { single: 0, multiple: 0, judge: 0, concept: 0, short: 0, essay: 0, case: 0 };
+            const maxScores = { single: 40, multiple: 30, judge: 20, concept: 40, short: 64, essay: 36, case: 30 };
+
+            // 客观题判分
+            ['single', 'multiple', 'judge'].forEach(type => {
+                fullQuestionBank[type].forEach(q => {
+                    const userAns = userAnswers[`${type}-${q.id}`];
+                    if (type === 'single') {
+                        if (userAns === q.answer) scores[type] += q.score;
+                    } else if (type === 'multiple') {
+                        if (JSON.stringify((userAns || []).sort()) === JSON.stringify(q.answer.sort())) scores[type] += q.score;
+                    } else if (type === 'judge') {
+                        if (userAns === q.answer) scores[type] += q.score;
+                    }
+                });
+            });
+
+            // 主观题（名词解释、简答、论述、案例分析）- 如果有API则调用，否则默认0分
+            if (apiConfig.key) {
+                // 这里可以添加AI判分逻辑
+                // 暂时默认0分
+            }
+
+            // 显示成绩
+            document.getElementById('exam-page').classList.add('hidden');
+            document.getElementById('result-page').classList.remove('hidden');
+
+            const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
+            document.getElementById('total-score').textContent = totalScore;
+            document.getElementById('score-progress').style.width = `${(totalScore / 260) * 100}%`;
+
+            // 各题型得分
+            ['single', 'multiple', 'judge', 'concept', 'short', 'essay', 'case'].forEach(type => {
+                document.getElementById(`${type}-score`).textContent = `${scores[type]}/${maxScores[type]}`;
+                document.getElementById(`${type}-progress`).style.width = `${(scores[type] / maxScores[type]) * 100}%`;
+            });
+
+            // 评级
+            const level = totalScore >= 230 ? '优秀' : totalScore >= 180 ? '良好' : totalScore >= 140 ? '及格' : '不及格';
+            document.getElementById('score-level').textContent = `成绩等级：${level}`;
+
+            // 保存分数供查看解析使用
+            window.examScores = scores;
+        }
+
+        function getOptionText(options, letters) {
+            if (!letters || (!Array.isArray(letters) && !letters)) return '未作答';
+            if (!Array.isArray(letters)) letters = [letters];
+            return letters.map(letter => {
+                const index = letter.charCodeAt(0) - 65;
+                return options && options[index] ? options[index] : letter;
+            }).join('、');
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function showReview() {
+            document.getElementById('result-page').classList.add('hidden');
+            document.getElementById('review-page').classList.remove('hidden');
+
+            const container = document.getElementById('review-container');
+            container.innerHTML = '';
+
+            const typeNames = { single: '单选题', multiple: '多选题', judge: '判断题', concept: '名词解释', short: '简答题', essay: '论述题', case: '案例分析' };
+
+            Object.keys(fullQuestionBank).forEach(type => {
+                const shuffledQuestions = shuffledQuestionBank[type] || fullQuestionBank[type];
+                shuffledQuestions.forEach((q, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'review-item';
+
+                    const userAns = userAnswers[`${type}-${q.id}`];
+                    let isCorrect = false;
+                    let userAnsText = '';
+
+                    if (type === 'single') {
+                        userAnsText = getOptionText(q.options, userAns);
+                        isCorrect = userAns === q.answer;
+                    } else if (type === 'multiple') {
+                        userAnsText = getOptionText(q.options, userAns);
+                        isCorrect = JSON.stringify((userAns || []).sort()) === JSON.stringify(q.answer.sort());
+                    } else if (type === 'judge') {
+                        userAnsText = userAns === undefined ? '未作答' : (userAns ? '正确' : '错误');
+                        isCorrect = userAns === q.answer;
+                    } else {
+                        userAnsText = userAns || '未作答';
+                    }
+
+                    let correctAnsText = '';
+                    if (type === 'single' || type === 'multiple') {
+                        correctAnsText = getOptionText(q.options, q.answer);
+                    } else if (type === 'judge') {
+                        correctAnsText = q.answer ? '正确' : '错误';
+                    } else {
+                        correctAnsText = q.answer;
+                    }
+
+                    const userAnsColor = isCorrect ? 'text-green-600' : 'text-red-600 font-bold';
+                    const tagClass = isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                    const tagText = isCorrect ? '✓ 正确' : '✗ 错误';
+
+                    item.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-bold">${typeNames[type]} ${index + 1}</span>
+                            ${type !== 'concept' && type !== 'short' && type !== 'essay' && type !== 'case' ? `<span class="px-2 py-1 rounded text-sm font-medium ${tagClass}">${tagText}</span>` : ''}
+                        </div>
+                        <p class="mb-2">${q.question}</p>
+                        <p class="text-sm"><strong>你的答案：</strong><span class="${userAnsColor}">${userAnsText}</span></p>
+                        <p class="text-sm"><strong>参考答案：</strong><span class="text-green-600 font-bold">${correctAnsText}</span></p>
+                        <p class="explanation"><strong>解析：</strong>${q.explain || q.answer}</p>
+                    `;
+
+                    container.appendChild(item);
+                });
+            });
+        }
+
+        function backToResult() {
+            document.getElementById('review-page').classList.add('hidden');
+            document.getElementById('result-page').classList.remove('hidden');
+        }
+
+        function restartExam() {
+            userAnswers = {};
+            timeLeft = 90 * 60;
+            document.getElementById('result-page').classList.add('hidden');
+            document.getElementById('review-page').classList.add('hidden');
+            document.getElementById('start-page').classList.remove('hidden');
+        }
+
+        function saveApiConfig() {
+            apiConfig.provider = document.getElementById('api-provider').value;
+            apiConfig.key = document.getElementById('api-key').value;
+            apiConfig.model = document.getElementById('api-model').value;
+            document.getElementById('api-modal').classList.add('hidden');
+            alert('API设置已保存！');
+        }
+    </script>
+</body>
+</html>
+
